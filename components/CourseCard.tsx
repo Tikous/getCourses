@@ -109,7 +109,7 @@ export default function CourseCard({ course, onPurchased }: CourseCardProps) {
           alt={course.title}
           className="w-full h-48 object-cover"
           onError={(e) => {
-            e.currentTarget.src = 'https://via.placeholder.com/400x200?text=Course+Image'
+            e.currentTarget.src = 'https://placehold.co/400x200?text=Course+Image'
           }}
         />
       </div>

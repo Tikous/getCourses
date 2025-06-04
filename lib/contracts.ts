@@ -105,6 +105,29 @@ export const COURSE_MARKETPLACE_ABI = [
     "type": "function"
   },
   {
+    "inputs": [{"internalType": "address", "name": "_student", "type": "address"}],
+    "name": "getStudentCourses",
+    "outputs": [
+      {
+        "components": [
+          {"internalType": "uint256", "name": "id", "type": "uint256"},
+          {"internalType": "string", "name": "title", "type": "string"},
+          {"internalType": "string", "name": "description", "type": "string"},
+          {"internalType": "string", "name": "imageUrl", "type": "string"},
+          {"internalType": "uint256", "name": "price", "type": "uint256"},
+          {"internalType": "address", "name": "instructor", "type": "address"},
+          {"internalType": "bool", "name": "isActive", "type": "bool"},
+          {"internalType": "uint256", "name": "studentsCount", "type": "uint256"}
+        ],
+        "internalType": "struct CourseMarketplace.Course[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {"internalType": "address", "name": "_user", "type": "address"},
       {"internalType": "uint256", "name": "_courseId", "type": "uint256"}

@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+// 用于加载环境变量
 require("dotenv").config();
 
 // Register ts-node for TypeScript support

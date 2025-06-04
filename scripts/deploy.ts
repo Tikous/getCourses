@@ -1,32 +1,25 @@
-import { ethers } from "hardhat";
+const { ethers } = require("hardhat");
+const fs = require('fs');
+const path = require('path');
 
 async function main() {
-  console.log("Starting deployment...");
 
   // Get the deployer account
   const [deployer] = await ethers.getSigners();
-  console.log("Deploying contracts with account:", deployer.address);
-  console.log("Account balance:", (await deployer.provider.getBalance(deployer.address)).toString());
 
   // Deploy SK Token
-  console.log("\nDeploying SK Token...");
   const SKToken = await ethers.getContractFactory("SKToken");
   const skToken = await SKToken.deploy();
   await skToken.waitForDeployment();
   const skTokenAddress = await skToken.getAddress();
-  console.log("SK Token deployed to:", skTokenAddress);
 
   // Deploy Course Marketplace
-  console.log("\nDeploying Course Marketplace...");
   const CourseMarketplace = await ethers.getContractFactory("CourseMarketplace");
   const courseMarketplace = await CourseMarketplace.deploy(skTokenAddress);
   await courseMarketplace.waitForDeployment();
   const courseMarketplaceAddress = await courseMarketplace.getAddress();
-  console.log("Course Marketplace deployed to:", courseMarketplaceAddress);
 
   // Create some sample courses for testing
-  console.log("\nCreating sample courses...");
-  
   const sampleCourses = [
     {
       title: "区块链开发入门",
@@ -59,17 +52,34 @@ async function main() {
     console.log(`Created course: ${course.title}`);
   }
 
-  console.log("\n=== Deployment Summary ===");
-  console.log("SK Token Address:", skTokenAddress);
-  console.log("Course Marketplace Address:", courseMarketplaceAddress);
-  console.log("Deployer Address:", deployer.address);
-  
-  console.log("\n=== Contract Verification Commands ===");
-  console.log(`npx hardhat verify --network sepolia ${skTokenAddress}`);
-  console.log(`npx hardhat verify --network sepolia ${courseMarketplaceAddress} ${skTokenAddress}`);
+  // Update lib/contracts.ts with new contract addresses
+  console.log("\nUpdating contract addresses in lib/contracts.ts...");
+  try {
+    // 获取contracts.ts文件路径
+    const contractsFilePath = path.resolve(__dirname, '../lib/contracts.ts');
+    
+    // 读取现有文件内容
+    let contractsFileContent = fs.readFileSync(contractsFilePath, 'utf8');
+    
+    // 使用正则表达式替换合约地址
+    contractsFileContent = contractsFileContent.replace(
+      /SK_TOKEN: '0x[a-fA-F0-9]+'/,
+      `SK_TOKEN: '${skTokenAddress}'`
+    );
+    
+    contractsFileContent = contractsFileContent.replace(
+      /COURSE_MARKETPLACE: '0x[a-fA-F0-9]+'/,
+      `COURSE_MARKETPLACE: '${courseMarketplaceAddress}'`
+    );
+    
+    // 写回文件
+    fs.writeFileSync(contractsFilePath, contractsFileContent);
+    console.log("Successfully updated contract addresses in lib/contracts.ts");
+  } catch (error) {
+    console.error("Failed to update lib/contracts.ts:", error);
+  }
 
   // Save deployment addresses to a file
-  const fs = require('fs');
   const deploymentInfo = {
     network: "sepolia",
     skToken: skTokenAddress,
@@ -79,7 +89,6 @@ async function main() {
   };
   
   fs.writeFileSync('deployment.json', JSON.stringify(deploymentInfo, null, 2));
-  console.log("\nDeployment info saved to deployment.json");
 }
 
 main()

@@ -20,10 +20,21 @@ export default function MyCourses() {
   const [createdCourses, setCreatedCourses] = useState<Course[]>([])
 
   // Get all active courses
-  const { data: allCourses, isLoading } = useReadContract({
+  const { data: allCourses, isLoading: isLoadingAllCourses } = useReadContract({
     address: CONTRACTS.COURSE_MARKETPLACE,
     abi: COURSE_MARKETPLACE_ABI,
     functionName: 'getActiveCourses',
+    query: {
+      enabled: !!address,
+    },
+  })
+  
+  // Get user's purchased courses
+  const { data: studentCourses, isLoading: isLoadingStudentCourses } = useReadContract({
+    address: CONTRACTS.COURSE_MARKETPLACE,
+    abi: COURSE_MARKETPLACE_ABI,
+    functionName: 'getStudentCourses',
+    args: [address as `0x${string}`],
     query: {
       enabled: !!address,
     },
@@ -32,33 +43,30 @@ export default function MyCourses() {
   useEffect(() => {
     if (!allCourses || !address) return
 
-    const checkPurchasedCourses = async () => {
-      const purchased: Course[] = []
+    const checkCreatedCourses = async () => {
       const created: Course[] = []
 
       for (const course of allCourses as Course[]) {
         // Check if user is the instructor
         if (course.instructor.toLowerCase() === address.toLowerCase()) {
           created.push(course)
-        } else {
-          // Check if user has purchased this course
-          try {
-            // We'll need to call the contract to check purchase status
-            // For now, we'll use a simpler approach
-            // In a real implementation, you'd batch these calls
-          } catch (error) {
-            console.error('Error checking course purchase status:', error)
-          }
         }
       }
 
       setCreatedCourses(created)
-      // For now, we'll leave purchased courses empty until we implement proper checking
-      setPurchasedCourses([])
     }
 
-    checkPurchasedCourses()
+    checkCreatedCourses()
   }, [allCourses, address])
+  
+  // Set purchased courses when data is loaded
+  useEffect(() => {
+    if (studentCourses) {
+      setPurchasedCourses(studentCourses as Course[])
+    }
+  }, [studentCourses])
+
+  const isLoading = isLoadingAllCourses || isLoadingStudentCourses
 
   if (isLoading) {
     return (

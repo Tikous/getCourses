@@ -22,6 +22,7 @@ contract SKToken is ERC20, Ownable {
         require(msg.value > 0, "Must send ETH to purchase tokens");
         
         uint256 tokenAmount = msg.value * EXCHANGE_RATE;
+        // 继承自ERC20合约的_mint函数，将tokenAmount发送到msg.sender地址
         _mint(msg.sender, tokenAmount);
         
         emit TokensPurchased(msg.sender, msg.value, tokenAmount);
